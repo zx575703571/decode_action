@@ -1,4 +1,4 @@
-//Sun Jul 14 2024 13:43:55 GMT+0000 (Coordinated Universal Time)
+//Mon Jul 15 2024 12:29:07 GMT+0000 (Coordinated Universal Time)
 //Base:https://github.com/echo094/decode-js
 //Modify:https://github.com/smallfawn/decode_action
 const _0x1366a8 = _0x1c156a("顺丰速运"),

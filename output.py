@@ -1,65 +1,113 @@
-#2024-07-14 13:43:46
+#2024-07-15 12:28:57
 import requests
-import os
 import time
+import os
+import uuid
 import random
-import hashlib
-class yuanshen():
- def __init__(self,cookie):
-  self.cookie=cookie
-  self.h={"Host":"app.zhuanbang.net","accept":"application/json, image/webp","user-agent":"Mozilla/5.0 (Linux; Android 12; M2104K10AC Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/96.0.4664.104 Mobile Safari/537.36 HuoNiuFusion/1.25.0_231652","x-requested-with":"XMLHttpRequest","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"https://app.zhuanbang.net/assist/activity/47","accept-language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7","accept-encoding":"gzip","Cookie":f"NiuToken={self.cookie}"}
- def sign_(self):
-  d=f"{self.csrftoken}#{self.sessionId}#{self.time}"
-  byte_string=d.encode('utf-8')
-  sha1=hashlib.sha1()
-  sha1.update(byte_string)
-  sign=sha1.hexdigest()
-  return sign
- def video(self,key):
+code="樱桃生活"
+ver="1.0"
+envname="yuanshen_ytsh"
+split_chars=['@','&','\n']
+debug=False
+debugcookie=""
+def env(*args,**kwargs):
+ def split_cookies(cookie,split_chars):
+  for sep in split_chars:
+   if sep in cookie:
+    return cookie.split(sep)
+  return[cookie]
+ def scmain(cookies):
+  for i,cookie in enumerate(cookies,1):
+   print(f"--------开始第{i}个账号--------")
+   main=yuanshen(cookie)
+   main.main()
+   print(f"--------第{i}个账号执行完毕--------")
+ if not os.getenv(envname)and not debug:
+  print(f"请先设置环境变量[{envname}]")
+  exit()
+ cookie=os.getenv(envname,"")
+ if debug:
+  cookie=debugcookie
+ try:
+  print(requests.get("https://gitee.com/HuaJiB/yuanshen34/raw/master/pubilc.txt").text,"\n\n\n")
+ except:
+  print("网络异常,链接公告服务器失败(gitee)，请检查网络")
+  exit()
+ cookies=split_cookies(cookie,split_chars)
+ account_count=len(cookies)
+ print(f"一共获取到{account_count}个账号")
+ print(f"=========🔔开始执行[{code}][{ver}]=========\n")
+ start_time=time.time()
+ if debug:
+  scmain(cookies)
+ else:
+  try:
+   scmain(cookies,*args,**kwargs)
+  except Exception as e:
+   print(f"脚本执行出错: {e}")
+ end_time=time.time()
+ execution_time=end_time-start_time
+ print(f"\n============🔔脚本[{code}]执行结束============")
+ print(f"本次脚本总运行时间: [{execution_time:.2f}] 秒")
+class yuanshen:
+ def __init__(self,cookie)->None:
+  self.headers={"token":cookie,"user-agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/118.0.0.0 Mobile Safari/537.36 uni-app Html5Plus/1.0 (Immersed/34.285713)","Content-Type":"application/json","Content-Length":"2","Host":"ap.svms.cn","Connection":"Keep-Alive","Accept-Encoding":"gzip"}
+ def sign(self):
+  url='http://ap.svms.cn/api/user/sign'
+  r=requests.post(url,headers=self.headers,json={}).json()
+  if r['code']==1:
+   print(f"签到成功[{r['msg']}]")
+  else:
+   print(f"签到失败[{r['msg']}]")
+ def addwater(self):
   i=0
-  while True:
+  for _ in range(5):
    i+=1
-   url=f"https://app.zhuanbang.net/{key}/launch?_random={int(time.time() * 1000)}&type=slide"
-   r=requests.get(url,headers=self.h).json()
-   if r['code']==0:
-    print(f"第[{i}]个红包获取信息成功")
-    self.csrftoken=r['data']['extArgs']['csrfToken']
-    self.sessionId=r['data']['extArgs']['sessionId']
-    self.time=int(time.time())
-    url=f"https://app.zhuanbang.net/{key}/award/grant?_t={self.time}"
-    data={"csrfToken":f"{self.csrftoken}","deviceId":f"{self.sessionId}","timestamp":f"{self.time}","sign":f"{self.sign_()}"}
-    r=requests.post(url,headers=self.h,data=data).json()
-    if r['code']==0:
-     print(f"第[{i}]个红包领取成功,获得[{r['data']['awardMoney']}]元")
-    else:
-     print(f"第[{i}]个红包领取失败---[{r['msg']}]")
-     break
+   url="http://ap.svms.cn/api/circle/send_ad"
+   uuidstr=str(uuid.uuid4()).replace("-","")
+   data={'type':'video_sign','uuid':uuidstr}
+   r=requests.post(url,headers=self.headers,json=data).json()
+   if r['isValid']:
+    print(f"第[{i}]次视频广告领水滴成功！")
    else:
-    print(f"第[{i}]个获取红包信息失败---[{r['msg']}]")
+    print(f"第[{i}]次视频广告领水滴失败！")
     break
-   if i>=21:
-    break
-   time.sleep(random.randint(20,48))
+   time.sleep(random.randint(30,40))
+ def use_water(self):
+  url="http://ap.svms.cn/api/user/water"
+  r=requests.post(url,headers=self.headers,json={}).json()
+  if r['code']==1:
+   print(f"浇水成功[{r['msg']}]")
+  else:
+   print(f"浇水失败[{r['msg']}]")
+  time.sleep(5)
+  url='http://ap.svms.cn/api/user/use_fl'
+  r=requests.post(url,headers=self.headers,json={}).json()
+  if r['code']==1:
+   print(f"使用肥料成功[{r['msg']}]")
+  else:
+   print(f"使用肥料失败[{r['msg']}]")
+  time.sleep(4)
+  url='http://ap.svms.cn/api/user/getFruit'
+  r=requests.post(url,headers=self.headers,json={}).json()
+  if r['code']==1:
+   print(f"收获果实成功[{r['msg']}]")
+  else:
+   print(f"收获果实失败[{r['msg']}]")
+ def userinfo(self):
+  url='http://ap.svms.cn/api/user/info'
+  r=requests.post(url,headers=self.headers,json={}).json()
+  if r['code']==1:
+   fruit=r["data"]["fruit"]
+   print(f"账号[{r['data']['nickname']}]  剩余樱桃[{fruit}]")
+  else:
+   print(f"获取账号信息失败[{r['msg']}]")
  def main(self):
-  print("===========开始执行快手刷视频===========")
-  self.video("kwai_video")
-  print("===========快手刷视频执行完毕===========")
-  print("===========开始执行抖音刷视频===========")
-  self.video("pangle_video")
-  print("===========抖音刷视频执行完毕===========")
+  self.sign()
+  self.addwater()
+  print("="*40)
+  self.use_water()
+  print("="*40)
+  self.userinfo()
 if __name__=='__main__':
- cookie=''
- if not cookie:
-  cookie=os.getenv("yuanshen_zb")
-  if not cookie:
-   print("⛔️请设置环境变量:yuanshen_zb")
-   exit()
- cookies=cookie.split("@")
- print(f"一共获取到{len(cookies)}个账号")
- i=1
- for cookie in cookies:
-  print(f"\n--------开始第{i}个账号--------")
-  main=yuanshen(cookie)
-  main.main()
-  print(f"--------第{i}个账号执行完毕--------")
-  i+=1
+ env()
