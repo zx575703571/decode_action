@@ -1,4 +1,4 @@
-//Sun Sep 08 2024 10:06:16 GMT+0000 (Coordinated Universal Time)
+//Fri Sep 13 2024 06:45:32 GMT+0000 (Coordinated Universal Time)
 //Base:https://github.com/echo094/decode-js
 //Modify:https://github.com/smallfawn/decode_action
 let AppKey = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
